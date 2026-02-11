@@ -23,12 +23,97 @@
         </script>
 </head>
 <body>
-    <div class="multiplayer-controls" style="text-align:center; margin: 20px 0;">
-        <button onclick="createRoom()" class="game-btn">Skapa Rum</button>
-        <button onclick="joinRoom()" class="game-btn">Gå med i Rum</button>
-        <div id="room-info" style="margin-top:10px; color:#ffd700;"></div>
-        <button id="copy-room-btn" class="game-btn" style="display:none; margin-top:10px;">Kopiera Rumskod</button>
-    </div>
+    <div id="lobby" class="screen">
+  <div class="lobby-shell">
+    <header class="lobby-header">
+      <div class="lobby-brand">
+        <div class="lobby-logo">⚔️</div>
+        <div>
+          <h1>Sten Sax Påse – RPG</h1>
+          <p>Skapa en hjälte, bjud in en vän och slåss om äran.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="lobby-grid">
+      <!-- Character card -->
+      <section class="lobby-card lobby-card--character">
+        <div class="card-title">
+          <h2>Din hjälte</h2>
+          <span class="badge">Profil</span>
+        </div>
+
+        <div class="character-row">
+          <button class="avatar-frame" type="button" onclick="openAvatarModal()">
+            <img id="lobby-avatar" src="images/Hero.png" alt="Avatar" />
+            <span class="avatar-frame__ring"></span>
+            <span class="avatar-frame__hint">Byt</span>
+          </button>
+
+          <div class="character-fields">
+            <label for="name-input">Namn</label>
+            <input id="name-input" maxlength="16" placeholder="Skriv ditt namn..." />
+            <div class="field-help">Visas i matchen. Max 16 tecken.</div>
+          </div>
+        </div>
+
+        <div class="character-tip">
+          <div class="tip-icon">✨</div>
+          <div>
+            <div class="tip-title">Tips</div>
+            <div class="tip-text">Klicka på avataren för att välja karaktär.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Match card -->
+      <section class="lobby-card lobby-card--match">
+        <div class="card-title">
+          <h2>Starta match</h2>
+          <span class="badge badge--gold">Online</span>
+        </div>
+
+        <button class="btn btn-primary" onclick="createRoomFromLobby()">
+          <span class="btn-icon">➕</span>
+          <span>Skapa match</span>
+        </button>
+
+        <div class="divider-row"><span>eller</span></div>
+
+        <div class="join-box">
+          <label for="room-code-input">Gå med via rumskod</label>
+          <div class="join-row">
+            <input id="room-code-input" maxlength="6" placeholder="ABC123" />
+            <button class="btn btn-secondary" onclick="joinRoomFromLobby()">
+              <span class="btn-icon">🔗</span>
+              <span>Gå med</span>
+            </button>
+          </div>
+
+          <div id="room-info" class="room-info"></div>
+
+          <button id="copy-room-btn" class="btn btn-ghost hidden" type="button">
+            Kopiera rumskod
+          </button>
+        </div>
+
+        <div class="lobby-footer-note">
+          Rummet rensas automatiskt när hosten lämnar.
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="game" class="screen hidden">
+
+    <div class="room-bar">
+  <div class="room-code">
+    Rumskod: <span id="room-code-in-game">—</span>
+  </div>
+  <button id="copy-room-btn-in-game" class="game-btn small">Kopiera</button>
+</div>
+
     <div class="game-board">
         <div class="divider"></div>
 
@@ -92,14 +177,17 @@
         </button>
     </div>
 
-    <div id="avatar-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeAvatarModal()">&times;</span>
-            <h3>Välj din Avatar</h3>
-            <div id="avatar-grid"></div>
-        </div>
+    <button class="game-btn" onclick="leaveMatch()" style="position:fixed; top:12px; right:12px; z-index:999;">
+        Lämna match
+    </button>
+</div>
+<div id="avatar-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAvatarModal()">&times;</span>
+        <h3>Välj din Avatar</h3>
+        <div id="avatar-grid"></div>
     </div>
-
+</div>
     <script src="script.js"></script>
 </body>
 </html>

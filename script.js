@@ -7,6 +7,7 @@ const db = window.db;
 if (!db) {
   console.error("Firebase db not initialized. Make sure firebase.initializeApp runs before script.js");
 }
+let gameOverHandled = false;
 let roomId = null;
 let playerId = null;
 let isHost = false;
@@ -15,6 +16,17 @@ let enemyName = 'SKELETT';
 let lastShownResultTs = 0;
 let presenceRef = null;
 let connectedRef = null;
+let myName = "HJÄLTE";
+let myAvatar = "Hero.png";
+function showLobby() {
+  document.getElementById("lobby").classList.remove("hidden");
+  document.getElementById("game").classList.add("hidden");
+}
+
+function showGame() {
+  document.getElementById("lobby").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+}
 
 function setupPresence() {
   if (!roomId || !playerId) return;
@@ -93,47 +105,126 @@ function showResultMultiplayer(myResult, roundToLog) {
 
 
 // UI for room join/create
-window.createRoom = async function() {
-    roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
-    playerId = 'player1';
-    isHost = true;
-    await db.ref('rooms/' + roomId).set({
-        player1: { avatar: 'Hero.png', name: 'HJÄLTE', move: null, score: 0 },
-        player2: { avatar: 'Skeleton.png', name: 'SKELETT', move: null, score: 0 },
-        turn: 'player1',
-        round: 1,
-        waiting: false,
-        lastResult: null
-    });
-    document.getElementById('room-info').textContent = 'Rumskod: ' + roomId + ' (Du är Spelare 1)';
-    const copyBtn = document.getElementById('copy-room-btn');
-    copyBtn.style.display = 'inline-block';
-    copyBtn.onclick = function() {
-        navigator.clipboard.writeText(roomId);
-        copyBtn.textContent = 'Kopierad!';
-        setTimeout(() => copyBtn.textContent = 'Kopiera Rumskod', 1500);
-    };
-    setupPresence();
-  listenRoom();
-}
+window.createRoomFromLobby = async function() {
+  // ensure name
+  myName = (document.getElementById("name-input").value.trim().toUpperCase() || "SPELARE");
+  localStorage.setItem("rps_name", myName);
 
-window.joinRoom = async function() {
-    roomId = prompt('Ange rumskod:');
-    playerId = 'player2';
-    isHost = false;
-    const snap = await db.ref('rooms/' + roomId).once('value');
-    if (!snap.exists()) { alert('Rummet finns inte!'); return; }
-      document.getElementById('room-info').textContent = 'Rumskod: ' + roomId + ' (Du är Spelare 2)';
-  const copyBtn = document.getElementById('copy-room-btn');
-  copyBtn.style.display = 'inline-block';
+  // set the in-game UI now too
+  document.querySelector(".player-name").textContent = myName;
+  playerImg.src = "images/" + myAvatar;
+
+  // create
+  roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
+  playerId = "player1";
+  isHost = true;
+  
+  await db.ref("rooms/" + roomId).set({
+      player1: { avatar: myAvatar, name: myName, move: null, score: 0 },
+      player2: { avatar: "Skeleton.png", name: "SKELETT", move: null, score: 0 },
+      round: 1,
+      lastResult: null,
+      presence: {}
+    });
+    setRoomCodeUI(roomId);
+
+  document.getElementById("room-info").textContent = "Rumskod: " + roomId;
+  const copyBtn = document.getElementById("copy-room-btn");
+  copyBtn.style.display = "inline-block";
   copyBtn.onclick = function() {
     navigator.clipboard.writeText(roomId);
-    copyBtn.textContent = 'Kopierad!';
-    setTimeout(() => copyBtn.textContent = 'Kopiera Rumskod', 1500);
+    copyBtn.textContent = "Kopierad!";
+    setTimeout(() => copyBtn.textContent = "Kopiera Rumskod", 1500);
   };
-  listenRoom();
+gameOverHandled = false;
+
   setupPresence();
+  listenRoom();
+  showGame();
+};
+
+window.joinRoomFromLobby = async function() {
+  myName = (document.getElementById("name-input").value.trim().toUpperCase() || "SPELARE");
+  localStorage.setItem("rps_name", myName);
+
+  const code = document.getElementById("room-code-input").value.trim().toUpperCase();
+  if (!code) return alert("Skriv en rumskod.");
+
+  roomId = code;
+  playerId = "player2";
+  isHost = false;
+setRoomCodeUI(roomId);
+
+  const snap = await db.ref("rooms/" + roomId).once("value");
+  if (!snap.exists()) return alert("Rummet finns inte!");
+
+  // set my profile in room
+  await db.ref("rooms/" + roomId + "/player2").update({
+    avatar: myAvatar,
+    name: myName,
+    move: null,
+    score: 0
+  });
+
+  // update UI
+  document.querySelector(".player-name").textContent = myName;
+  playerImg.src = "images/" + myAvatar;
+gameOverHandled = false;
+
+  setupPresence();
+  listenRoom();
+  showGame();
+};
+function setRoomCodeUI(code) {
+  // Lobby
+  const lobbyInfo = document.getElementById("room-info");
+  const lobbyCopy = document.getElementById("copy-room-btn");
+
+  if (lobbyInfo) lobbyInfo.textContent = code ? ("Rumskod: " + code) : "";
+  if (lobbyCopy) {
+    lobbyCopy.style.display = code ? "inline-block" : "none";
+    lobbyCopy.onclick = () => {
+      navigator.clipboard.writeText(code);
+      lobbyCopy.textContent = "Kopierad!";
+      setTimeout(() => lobbyCopy.textContent = "Kopiera Rumskod", 1500);
+    };
+  }
+
+  // In-game
+  const inGameCode = document.getElementById("room-code-in-game");
+  const inGameCopy = document.getElementById("copy-room-btn-in-game");
+
+  if (inGameCode) inGameCode.textContent = code || "—";
+  if (inGameCopy) {
+    inGameCopy.style.display = code ? "inline-block" : "none";
+    inGameCopy.onclick = () => {
+      navigator.clipboard.writeText(code);
+      inGameCopy.textContent = "Kopierad!";
+      setTimeout(() => inGameCopy.textContent = "Kopiera", 1500);
+    };
+  }
 }
+
+window.leaveMatch = function() {
+  try {
+    if (presenceRef) presenceRef.remove();
+  } catch (e) {}
+
+  // stop listening (optional but nice)
+  try {
+    if (roomId) db.ref("rooms/" + roomId).off();
+  } catch (e) {}
+
+  roomId = null;
+  playerId = null;
+  isHost = false;
+setRoomCodeUI(null);
+
+  // reset UI a bit
+  resetHands();
+  gameOverHandled = false;
+  showLobby();
+};
 
 function listenRoom() {
   db.ref('rooms/' + roomId).on('value', snap => {
@@ -145,13 +236,18 @@ function listenRoom() {
     currentRound = data.round || 1;
 
     // Game over UI
-    if (currentRound > maxRounds) {
-      controlsDiv.classList.add('hidden');
-      gameOverPanel.classList.remove('hidden');
-      gameMessage.innerText = "GAME OVER";
-      disableButtons();
-      return;
-    }
+   if (currentRound > maxRounds) {
+  disableButtons();
+
+  if (!gameOverHandled) {
+    gameOverHandled = true;
+    endMatchMultiplayer(); // loggar 1 rad + visar panel
+  }
+
+  return;
+}
+
+
 
     // Update avatars/names + scores
     if (playerId === 'player1') {
@@ -361,14 +457,33 @@ function closeAvatarModal() {
 
 // Byt spelarens bild
 function changeAvatar(filename) {
-    playerImg.src = `images/${filename}`;
-    const playerNameElem = document.querySelector('.player-name');
-    let name = filename.replace(/\.[^/.]+$/, "");
-    name = name.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    playerNameElem.textContent = name;
-    if (roomId && playerId) sendAvatar(filename, name);
-    closeAvatarModal();
+  // Spara avatar
+  myAvatar = filename;
+  localStorage.setItem("rps_avatar", myAvatar);
+
+  // Uppdatera lobby-avatar direkt
+  const lobbyAvatar = document.getElementById("lobby-avatar");
+  if (lobbyAvatar) lobbyAvatar.src = "images/" + myAvatar;
+
+  // Uppdatera in-game avatar om den finns
+  if (playerImg) playerImg.src = "images/" + myAvatar;
+
+  // Om vi är i ett rum: skicka avatar + nuvarande namn
+  const currentName = (document.getElementById("name-input")?.value || myName || "SPELARE").trim().toUpperCase();
+  myName = currentName;
+  localStorage.setItem("rps_name", myName);
+
+  // Uppdatera in-game namn direkt
+  const playerNameElem = document.querySelector(".player-name");
+  if (playerNameElem) playerNameElem.textContent = myName;
+
+  if (roomId && playerId) {
+    sendAvatar(myAvatar, myName);
+  }
+
+  closeAvatarModal();
 }
+
 
 // Stäng modal om man klickar utanför rutan
 window.onclick = function(event) {
@@ -381,6 +496,7 @@ window.onclick = function(event) {
 // --- SPEL-LOGIK (Samma som förut) ---
 
 function restartGame() {
+    gameOverHandled = false;
     playerScore = 0;
     enemyScore = 0;
     currentRound = 1;
@@ -533,5 +649,58 @@ function disableButtons() {
 function enableButtons() {
     document.querySelectorAll('.game-btn').forEach(btn => { btn.disabled = false; btn.style.opacity = "1"; btn.style.cursor = "pointer"; });
 }
+function initLobby() {
+  const nameInput = document.getElementById("name-input");
+  const lobbyAvatar = document.getElementById("lobby-avatar");
+
+  myName = localStorage.getItem("rps_name") || myName;
+  myAvatar = localStorage.getItem("rps_avatar") || myAvatar;
+
+  nameInput.value = myName;
+  lobbyAvatar.src = "images/" + myAvatar;
+
+  nameInput.addEventListener("input", () => {
+    myName = nameInput.value.trim().toUpperCase() || "SPELARE";
+    localStorage.setItem("rps_name", myName);
+
+    // uppdatera in-game direkt om den finns
+    const playerNameElem = document.querySelector(".player-name");
+    if (playerNameElem) playerNameElem.textContent = myName;
+
+    // om du är i match: skicka namn
+    if (roomId && playerId) sendAvatar(myAvatar, myName);
+  });
+}
+function endMatchMultiplayer() {
+  let finalMsg = "", matchResult = "";
+  matchCount++;
+
+  if (playerScore > enemyScore) {
+    finalMsg = "MATCHVINST! 🏆";
+    gameMessage.style.color = "#2ecc71";
+    matchResult = `<span class="text-win">VINST (${playerScore}p)</span>`;
+  } else if (enemyScore > playerScore) {
+    finalMsg = "MATCHFÖRLUST 💀";
+    gameMessage.style.color = "#e74c3c";
+    matchResult = `<span class="text-lose">FÖRLUST (${enemyScore}p)</span>`;
+  } else {
+    finalMsg = "MATCH OAVGJORD";
+    gameMessage.style.color = "#f1c40f";
+    matchResult = `<span class="text-draw">LIKA (${playerScore}p)</span>`;
+  }
+
+  roundDisplay.innerText = "GAME OVER";
+  gameMessage.innerText = finalMsg;
+
+  const li = document.createElement("li");
+  li.className = "match-item";
+  li.innerHTML = `Match ${matchCount}: ${matchResult}`;
+  matchList.prepend(li);
+
+  controlsDiv.classList.add("hidden");
+  gameOverPanel.classList.remove("hidden");
+}
+
+initLobby();
 
 updateUI();
