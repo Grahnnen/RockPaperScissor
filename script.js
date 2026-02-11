@@ -13,6 +13,84 @@ let isHost = false;
 let enemyAvatar = 'Skeleton.png';
 let enemyName = 'SKELETT';
 let lastShownResultTs = 0;
+let presenceRef = null;
+let connectedRef = null;
+
+function setupPresence() {
+  if (!roomId || !playerId) return;
+
+  // "am I connected to Firebase?"
+  connectedRef = db.ref('.info/connected');
+  presenceRef = db.ref(`rooms/${roomId}/presence/${playerId}`);
+
+  connectedRef.on('value', snap => {
+    if (snap.val() === true) {
+      // mark me online
+      presenceRef.onDisconnect().remove();
+      presenceRef.set(true);
+
+      // update activity timestamp too (optional but nice)
+      db.ref(`rooms/${roomId}`).update({
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+  });
+
+  // When this client decides to close/leave nicely (best effort)
+  window.addEventListener('beforeunload', () => {
+    try { presenceRef.remove(); } catch (e) {}
+  });
+}
+
+let deleteTimer = null;
+
+function maybeDeleteRoomIfEmpty(data) {
+  if (!data) return;
+
+  const p = data.presence || {};
+  const hostOnline = !!p.player1;
+  const guestOnline = !!p.player2;
+
+  // ✅ Om hosten lämnar => radera rummet (efter lite grace)
+  if (!hostOnline) {
+    if (!deleteTimer) {
+      deleteTimer = setTimeout(() => {
+        db.ref(`rooms/${roomId}`).remove();
+      }, 6000); // 6 sek "grace" (så refresh inte nukar rummet)
+    }
+  } else {
+    // host online -> avbryt eventuell pending delete
+    if (deleteTimer) {
+      clearTimeout(deleteTimer);
+      deleteTimer = null;
+    }
+  }
+}
+function showResultMultiplayer(myResult, roundToLog) {
+  let msg = "", logClass = "", logText = "";
+
+  if (myResult === 'win') {
+    msg = "DU VANN!";
+    gameMessage.style.color = "#2ecc71";
+    logClass = "text-win";
+    logText = "VINST";
+  } else if (myResult === 'lose') {
+    msg = "DU FÖRLORADE!";
+    gameMessage.style.color = "#e74c3c";
+    logClass = "text-lose";
+    logText = "FÖRLUST";
+  } else {
+    msg = "OAVGJORT!";
+    gameMessage.style.color = "#f1c40f";
+    logClass = "text-draw";
+    logText = "OAVGJORT";
+  }
+
+  gameMessage.innerText = msg;
+  addRoundHistory(roundToLog, logText, logClass);
+}
+
+
 
 // UI for room join/create
 window.createRoom = async function() {
@@ -27,14 +105,15 @@ window.createRoom = async function() {
         waiting: false,
         lastResult: null
     });
-     document.getElementById('room-info').textContent = 'Rumskod: ' + roomId + ' (Du är Spelare 1)';
-  const copyBtn = document.getElementById('copy-room-btn');
-  copyBtn.style.display = 'inline-block';
-  copyBtn.onclick = function() {
-    navigator.clipboard.writeText(roomId);
-    copyBtn.textContent = 'Kopierad!';
-    setTimeout(() => copyBtn.textContent = 'Kopiera Rumskod', 1500);
-  };
+    document.getElementById('room-info').textContent = 'Rumskod: ' + roomId + ' (Du är Spelare 1)';
+    const copyBtn = document.getElementById('copy-room-btn');
+    copyBtn.style.display = 'inline-block';
+    copyBtn.onclick = function() {
+        navigator.clipboard.writeText(roomId);
+        copyBtn.textContent = 'Kopierad!';
+        setTimeout(() => copyBtn.textContent = 'Kopiera Rumskod', 1500);
+    };
+    setupPresence();
   listenRoom();
 }
 
@@ -53,11 +132,13 @@ window.joinRoom = async function() {
     setTimeout(() => copyBtn.textContent = 'Kopiera Rumskod', 1500);
   };
   listenRoom();
+  setupPresence();
 }
 
 function listenRoom() {
   db.ref('rooms/' + roomId).on('value', snap => {
     const data = snap.val();
+    maybeDeleteRoomIfEmpty(data);
     if (!data) return;
 
     // Sync round from Firebase
@@ -110,11 +191,10 @@ function listenRoom() {
       const myResult = (playerId === 'player1') ? data.lastResult.p1Result : data.lastResult.p2Result;
 
       // Show win/lose/draw message + add round history
-      handleResult(myResult);
+      const roundToLog = data.lastResult.round;
+showResultMultiplayer(myResult, roundToLog);
+updateUI(); // score/round kommer från Firebase ändå
 
-      // Undo the local currentRound++ (Firebase is source of truth)
-      currentRound = data.round || currentRound;
-      updateUI();
 
       disableButtons();
       return; // don't overwrite message below
