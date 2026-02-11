@@ -31,28 +31,32 @@ function showGame() {
 function setupPresence() {
   if (!roomId || !playerId) return;
 
-  // "am I connected to Firebase?"
-  connectedRef = db.ref('.info/connected');
+  connectedRef = db.ref(".info/connected");
   presenceRef = db.ref(`rooms/${roomId}/presence/${playerId}`);
 
-  connectedRef.on('value', snap => {
+  connectedRef.on("value", snap => {
     if (snap.val() === true) {
-      // mark me online
+      // Markera mig online och ta bort mig automatiskt vid disconnect
       presenceRef.onDisconnect().remove();
       presenceRef.set(true);
 
-      // update activity timestamp too (optional but nice)
+      // ✅ NYTT: Om jag är host -> radera hela rummet när host disconnectar
+      if (playerId === "player1") {
+        db.ref(`rooms/${roomId}`).onDisconnect().remove();
+      }
+
+      // uppdatera timestamp
       db.ref(`rooms/${roomId}`).update({
         updatedAt: firebase.database.ServerValue.TIMESTAMP
       });
     }
   });
 
-  // When this client decides to close/leave nicely (best effort)
-  window.addEventListener('beforeunload', () => {
+  window.addEventListener("beforeunload", () => {
     try { presenceRef.remove(); } catch (e) {}
   });
 }
+
 
 let deleteTimer = null;
 
