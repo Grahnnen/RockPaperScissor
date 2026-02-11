@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sten Sax Påse - RPG Battle</title>
+        <link rel="stylesheet" href="style.css">
+        <!-- Firebase scripts and config -->
+        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+        <script>
+            const firebaseConfig = {
+                apiKey: "AIzaSyBJkyYV3qLJvGJ_bbpjBAbiMFtIzZ7T7PQ",
+                authDomain: "rockpaperscissor-c44db.firebaseapp.com",
+                projectId: "rockpaperscissor-c44db",
+                storageBucket: "rockpaperscissor-c44db.appspot.com",
+                messagingSenderId: "445159166362",
+                appId: "1:445159166362:web:97078ae6fc641dfa2bea23",
+                databaseURL: "https://rockpaperscissor-c44db-default-rtdb.europe-west1.firebasedatabase.app"
+            };
+            firebase.initializeApp(firebaseConfig);
+            window.db = firebase.database();
+        </script>
+</head>
+<body>
+    <div class="multiplayer-controls" style="text-align:center; margin: 20px 0;">
+        <button onclick="createRoom()" class="game-btn">Skapa Rum</button>
+        <button onclick="joinRoom()" class="game-btn">Gå med i Rum</button>
+        <div id="room-info" style="margin-top:10px; color:#ffd700;"></div>
+        <button id="copy-room-btn" class="game-btn" style="display:none; margin-top:10px;">Kopiera Rumskod</button>
+    </div>
+    <div class="game-board">
+        <div class="divider"></div>
+
+        <div class="match-history-panel">
+            <h3>Tidigare Matcher</h3>
+            <ul id="match-list"></ul>
+        </div>
+
+        <div class="center-panel">
+            <div class="game-info">
+                <h2 id="round-display">Runda 1 / 5</h2>
+                <div id="game-message">VÄLJ VAPEN!</div>
+            </div>
+            <div class="round-history-board">
+                <h3>Rund-historik</h3>
+                <ul id="round-list"></ul>
+            </div>
+            <div id="game-over-panel" class="hidden">
+                <button id="restart-btn" onclick="restartGame()">SPELA NY MATCH</button>
+            </div>
+        </div>
+
+        <div class="player-zone zone">
+            <div class="avatar-container player-clickable" onclick="openAvatarModal()">
+                <img src="images/Hero.png" alt="Spelare" id="player-img" class="avatar">
+                <div class="name player-name">HJÄLTE</div>
+                <div class="score">Poäng: <span id="player-score">0</span></div>
+                <div class="click-hint">(Klicka för att byta)</div>
+            </div>
+            
+            <div class="hand-display">
+                <div id="player-choice-text" class="choice-text">REDO</div>
+                <div id="player-hand" class="hand-icon">🤘🏽</div>
+            </div>
+        </div>
+
+        <div class="enemy-zone zone">
+            <div class="avatar-container">
+                <img src="images/Skeleton.png" alt="Fiende" class="avatar">
+                <div class="name enemy-name">SKELETT</div>
+                <div class="score">Poäng: <span id="enemy-score">0</span></div>
+            </div>
+
+            <div class="hand-display">
+                <div id="enemy-choice-text" class="choice-text">REDO</div>
+                <div id="enemy-hand" class="hand-icon">🤘💀</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls-container" id="controls">
+        <button class="game-btn" onclick="playGame('sten')">
+            <div class="btn-inner"><span class="btn-icon">✊🏽</span><span>Sten</span></div>
+        </button>
+        <button class="game-btn" onclick="playGame('sax')">
+            <div class="btn-inner"><span class="btn-icon">✌🏽</span><span>Sax</span></div>
+        </button>
+        <button class="game-btn" onclick="playGame('pase')">
+            <div class="btn-inner"><span class="btn-icon">✋🏽</span><span>Påse</span></div>
+        </button>
+    </div>
+
+    <div id="avatar-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAvatarModal()">&times;</span>
+            <h3>Välj din Avatar</h3>
+            <div id="avatar-grid"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

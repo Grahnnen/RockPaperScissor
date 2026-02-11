@@ -1,0 +1,208 @@
+/* Grundinställningar */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #1e272e;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* --- Spelplanen --- */
+.game-board {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    width: 100%;
+    background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+}
+
+.divider {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, #ffd700, transparent);
+    transform: translateX(-50%);
+    z-index: 1;
+    opacity: 0.5;
+}
+
+/* --- Paneler (Historik & Mitten) --- */
+.match-history-panel {
+    position: absolute;
+    top: 20px; left: 20px;
+    width: 200px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px; padding: 10px;
+    color: #fff; z-index: 5;
+    border: 1px solid #444;
+}
+.match-history-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: #ffd700; border-bottom: 1px solid #555; text-transform: uppercase; }
+#match-list { list-style: none; padding: 0; margin: 0; font-size: 12px; }
+.match-item { padding: 5px; border-bottom: 1px solid #333; }
+
+.center-panel {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 15px; width: 350px;
+    pointer-events: none;
+}
+#game-over-panel { pointer-events: auto; }
+.game-info {
+    background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,20,0.95));
+    padding: 20px; border-radius: 12px;
+    text-align: center; color: white;
+    border: 2px solid #555;
+    box-shadow: 0 0 25px rgba(0,0,0,0.7); width: 100%;
+}
+#round-display { font-size: 18px; color: #aaa; margin: 0 0 5px 0; letter-spacing: 1px; }
+#game-message { font-size: 28px; font-weight: 800; text-transform: uppercase; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.round-history-board { background-color: rgba(0, 0, 0, 0.7); border-radius: 8px; padding: 10px; width: 80%; text-align: center; color: #fff; }
+.round-history-board h3 { margin: 0; font-size: 12px; color: #888; text-transform: uppercase; }
+#round-list { list-style: none; padding: 0; margin: 5px 0 0 0; max-height: 100px; overflow-y: auto; font-size: 12px; }
+.round-item { display: flex; justify-content: space-between; padding: 2px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.text-win { color: #2ecc71; } .text-lose { color: #e74c3c; } .text-draw { color: #f1c40f; }
+
+/* --- Zoner (Layout fixad här) --- */
+.zone {
+    width: 50%;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    /* ÄNDRAT: Centrera allt horisontellt för snyggare stapling */
+    align-items: center; 
+    justify-content: space-between;
+    z-index: 2;
+}
+
+/* Vi behåller vänster/höger orientering genom text-align om det behövs, men centrering ser oftast bäst ut */
+.player-zone { text-align: center; padding-bottom: 50px; }
+.enemy-zone { text-align: center; }
+
+/* --- Avatarer & Klickbarhet --- */
+.avatar-container { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+/* NYTT: Gör spelarens avatar klickbar */
+.player-clickable {
+    cursor: pointer;
+}
+.player-clickable:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.click-hint {
+    font-size: 10px; color: #aaa; margin-top: 5px; opacity: 0; transition: opacity 0.2s;
+}
+.player-clickable:hover .click-hint { opacity: 1; }
+
+.avatar {
+    width: 120px; height: 120px;
+    border: 4px solid #555; border-radius: 12px;
+    object-fit: cover; background-color: #000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.name { font-size: 18px; font-weight: bold; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px #000; }
+.player-name { color: #2ecc71; } .enemy-name { color: #e74c3c; }
+.score { font-size: 16px; color: #ddd; margin-top: 5px; font-weight: bold;}
+
+/* --- Händer och Val (Layout fixad) --- */
+.hand-display {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* ÄNDRAT: Tog bort absolut positionering så texten staplas ovanför handen */
+.choice-text {
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff; 
+    margin-bottom: 10px; /* Mellanrum ner till handen */
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px #000;
+    min-height: 40px; /* Håller platsen även när den är tom */
+}
+
+.hand-icon {
+    font-size: 150px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); 
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+    line-height: 1;
+}
+
+/* --- Knappar --- */
+.controls-container {
+    height: 130px; background: #111; display: flex; justify-content: center; align-items: center;
+    gap: 40px; border-top: 4px solid #333; z-index: 20; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+}
+.game-btn {
+    background: linear-gradient(to bottom, #34495e, #2c3e50);
+    border: 2px solid #5d6d7e; border-bottom: 5px solid #1a252f;
+    border-radius: 15px; padding: 0; cursor: pointer; transition: all 0.1s;
+    width: 120px; height: 90px; outline: none; position: relative; overflow: hidden;
+}
+.btn-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
+.game-btn:hover { transform: translateY(-2px); border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+.game-btn:active { transform: translateY(3px); border-bottom-width: 2px; }
+.game-btn span.btn-icon { font-size: 40px; margin-bottom: 5px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+.game-btn span { color: #ecf0f1; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+.hidden { display: none !important; }
+#restart-btn {
+    background: linear-gradient(to bottom, #2ecc71, #27ae60); border: none; border-bottom: 5px solid #1e8449;
+    color: white; font-size: 18px; font-weight: bold; padding: 15px 40px; border-radius: 50px;
+    cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4); transition: transform 0.1s;
+}
+#restart-btn:hover { transform: scale(1.05); } #restart-btn:active { transform: scale(0.95); border-bottom-width: 2px; }
+
+/* --- NYTT: Modal (Popup) Styles --- */
+.modal {
+    position: fixed; z-index: 100; left: 0; top: 0;
+    width: 100%; height: 100%; overflow: auto;
+    background-color: rgba(0,0,0,0.8); /* Mörk bakgrund */
+    display: flex; justify-content: center; align-items: center;
+}
+.modal-content {
+    background: linear-gradient(135deg, #2c3e50, #1a1a1a);
+    border: 2px solid #ffd700; border-radius: 15px;
+    padding: 20px; width: 80%; max-width: 500px;
+    color: white; text-align: center; position: relative;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+}
+.close-modal {
+    position: absolute; top: 10px; right: 15px;
+    color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;
+}
+.close-modal:hover { color: #ffd700; }
+#avatar-grid {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px;
+}
+.avatar-thumbnail {
+    width: 80px; height: 80px; object-fit: cover;
+    border: 3px solid #555; border-radius: 10px; cursor: pointer; transition: transform 0.2s;
+}
+.avatar-thumbnail:hover { transform: scale(1.1); border-color: #2ecc71; }
+
+/*Animationer*/
+.shake { animation: shakeAnim 0.5s ease-in-out infinite; }
+@keyframes shakeAnim { 0% { transform: rotate(0deg) translateY(0); } 25% { transform: rotate(-10deg) translateY(-10px); } 50% { transform: rotate(10deg) translateY(10px); } 75% { transform: rotate(-10deg) translateY(-10px); } 100% { transform: rotate(0deg) translateY(0); } }
+.pop { animation: popAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popAnim { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }

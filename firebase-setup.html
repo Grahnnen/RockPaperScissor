@@ -1,0 +1,16 @@
+<!-- Add this in the <head> of your index.html, before your script.js -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<!-- You will need to fill in your own Firebase config below -->
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBJkyYV3qLJvGJ_bbpjBAbiMFtIzZ7T7PQ",
+  authDomain: "rockpaperscissor-c44db.firebaseapp.com",
+  projectId: "rockpaperscissor-c44db",
+  storageBucket: "rockpaperscissor-c44db.firebasestorage.app",
+  messagingSenderId: "445159166362",
+  appId: "1:445159166362:web:97078ae6fc641dfa2bea23"
+};
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
