@@ -1,7 +1,7 @@
 # RockPaperScissor
 
 A real-time multiplayer Rock Paper Scissors game with an RPG-inspired interface.  
-This project uses Firebase Realtime Database for multiplayer synchronization and vanilla JavaScript for all client logic. :contentReference[oaicite:1]{index=1}
+This project uses Firebase Realtime Database for multiplayer synchronization and vanilla JavaScript for all client logic.
 
 ---
 
@@ -14,7 +14,7 @@ This project uses Firebase Realtime Database for multiplayer synchronization and
 - Round and match history panels  
 - Automatic room cleanup when the host disconnects  
 - Persistent player profile using `localStorage`  
-- Runs entirely in the browser (no backend server) :contentReference[oaicite:2]{index=2}
+- Runs entirely in the browser (no backend server)
 
 ---
 
@@ -46,20 +46,6 @@ Replace the URL above if you use a custom GitHub Pages domain or username.
 
 ---
 
-## Project Structure
-
-/
-├─ index.html
-├─ style.css
-├─ script.js
-├─ images/
-├─ firebase.json
-├─ database.rules.json
-└─ .github/
-└─ workflows/
-
----
-
 ## Installation (Local Development)
 
 To run locally:
@@ -77,7 +63,7 @@ Start creating and joining rooms.
 
 No build step required.
 
-##Firebase Setup
+## Firebase Setup
 Your project currently includes sample Firebase configuration files (firebase.json and database.rules.json).
 Make sure:
 
@@ -87,7 +73,7 @@ Rules allow read/write access for testing.
 
 Realtime Database URL matches the one in index.html. 
 
-##Notes
+## Notes
 This is an educational/demo project.
 
 Client-side Firebase config is visible by design.
