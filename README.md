@@ -1,78 +1,98 @@
-Rock Paper Scissors – RPG Multiplayer
+# RockPaperScissor
 
-A real-time multiplayer Rock Paper Scissors game with an RPG-inspired interface, built using vanilla JavaScript and Firebase Realtime Database.
+A real-time multiplayer Rock Paper Scissors game with an RPG-inspired interface.  
+This project uses Firebase Realtime Database for multiplayer synchronization and vanilla JavaScript for all client logic. :contentReference[oaicite:1]{index=1}
 
-The project focuses on real-time state synchronization, client-side architecture, and UI/UX design rather than complex game mechanics.
+---
 
-Features
+## Features
 
-Real-time multiplayer using Firebase Realtime Database
+- Real-time multiplayer using Firebase Realtime Database  
+- Room-based matchmaking with shareable room codes  
+- Lobby screen with name and avatar selection  
+- Turn-based gameplay with synchronized results  
+- Round and match history panels  
+- Automatic room cleanup when the host disconnects  
+- Persistent player profile using `localStorage`  
+- Runs entirely in the browser (no backend server) :contentReference[oaicite:2]{index=2}
 
-Room-based matchmaking with shareable room codes
+---
 
-Lobby screen with name and avatar selection
+## Live Demo
 
-Turn-based gameplay with synchronized results
+https://Grahnnen.github.io/RockPaperScissor/ :contentReference[oaicite:3]{index=3}
 
-Match and round history tracking
+Replace the URL above if you use a custom GitHub Pages domain or username.
 
-Automatic room cleanup when the host disconnects
+---
 
-Persistent player profile using localStorage
+## How It Works
 
-Fully client-side application
+1. A player enters a name and selects an avatar.
+2. The player creates a room or joins one using a room code.
+3. Both players submit a choice (rock, paper, or scissors).
+4. The host resolves the round and writes the result to Firebase.
+5. Both players receive the update and see the outcome.
+6. Rounds continue until match end. :contentReference[oaicite:4]{index=4}
 
-Technical Overview
+---
 
-Frontend: HTML, CSS, Vanilla JavaScript
-Realtime Backend: Firebase Realtime Database
-Hosting: GitHub Pages
+## Technical Stack
 
-Architecture highlights:
+- **Frontend:** HTML, CSS, JavaScript  
+- **Realtime Backend:** Firebase Realtime Database  
+- **Hosting:** GitHub Pages  
+- No backend server or build tools required :contentReference[oaicite:5]{index=5}
 
-Lobby logic separated from game logic
+---
 
-Firebase used as the single source of truth
+## Project Structure
 
-Host-authoritative round resolution
+/
+├─ index.html
+├─ style.css
+├─ script.js
+├─ images/
+├─ firebase.json
+├─ database.rules.json
+└─ .github/
+└─ workflows/
 
-Presence tracking via Firebase .info/connected
+---
 
-How to Play
+## Installation (Local Development)
 
-Open the game in your browser
+To run locally:
 
-Enter a player name and select an avatar
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/Grahnnen/RockPaperScissor.git
+Open index.html in a browser.
 
-Create a match or join one using a room code
+Enter your Firebase config in the <script> near the top of index.html.
 
-Both players choose Rock, Paper, or Scissors
+Enable Realtime Database in the Firebase Console and set appropriate rules.
 
-Results are revealed simultaneously
+Start creating and joining rooms.
 
-After the final round, start a new match or leave the room
+No build step required.
 
-Live Demo
+##Firebase Setup
+Your project currently includes sample Firebase configuration files (firebase.json and database.rules.json).
+Make sure:
 
-https://Grahnnen.github.io/RockPaperScissor/
+Realtime Database is enabled.
 
-Project Structure
-images/
-style.css
-firebase.js
-lobby.js
-game.js
-index.html
+Rules allow read/write access for testing.
 
-Notes
+Realtime Database URL matches the one in index.html. 
 
-This project is intended for educational purposes
+##Notes
+This is an educational/demo project.
 
-Firebase API keys are exposed by design for client-side applications
+Client-side Firebase config is visible by design.
 
-No authentication is used; rooms are temporary and auto-cleaned
+No authentication is used; rooms are temporary and removed automatically. 
 
-Author
-
-Robin
-System Development student focusing on frontend and real-time web applications
+##Author
+Robin (Grahnnen) — System Development student focusing on frontend and real-time web applications.
