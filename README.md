@@ -20,9 +20,7 @@ This project uses Firebase Realtime Database for multiplayer synchronization and
 
 ## Live Demo
 
-https://Grahnnen.github.io/RockPaperScissor/ :contentReference[oaicite:3]{index=3}
-
-Replace the URL above if you use a custom GitHub Pages domain or username.
+https://Grahnnen.github.io/RockPaperScissor/
 
 ---
 
@@ -33,7 +31,7 @@ Replace the URL above if you use a custom GitHub Pages domain or username.
 3. Both players submit a choice (rock, paper, or scissors).
 4. The host resolves the round and writes the result to Firebase.
 5. Both players receive the update and see the outcome.
-6. Rounds continue until match end. :contentReference[oaicite:4]{index=4}
+6. Rounds continue until match end.
 
 ---
 
@@ -42,7 +40,7 @@ Replace the URL above if you use a custom GitHub Pages domain or username.
 - **Frontend:** HTML, CSS, JavaScript  
 - **Realtime Backend:** Firebase Realtime Database  
 - **Hosting:** GitHub Pages  
-- No backend server or build tools required :contentReference[oaicite:5]{index=5}
+- No backend server or build tools required
 
 ---
 
@@ -80,5 +78,5 @@ Client-side Firebase config is visible by design.
 
 No authentication is used; rooms are temporary and removed automatically. 
 
-##Author
+## Author
 Robin (Grahnnen) — System Development student focusing on frontend and real-time web applications.
